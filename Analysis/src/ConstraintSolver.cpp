@@ -2037,6 +2037,21 @@ bool ConstraintSolver::tryDispatchHasIndexer(
     }
     else if (auto tt = getMutable<TableType>(subjectType))
     {
+        // A string singleton key is statically known, so a named property takes
+        // precedence over the table's indexer, matching `t.key` and indexing
+        // with a constant string.
+        if (auto stv = get<SingletonType>(indexType))
+        {
+            if (auto ss = get<StringSingleton>(stv))
+            {
+                if (auto it = tt->props.find(ss->value); it != tt->props.end() && it->second.readTy)
+                {
+                    bind(constraint, resultType, *it->second.readTy);
+                    return true;
+                }
+            }
+        }
+
         if (auto indexer = tt->indexer)
         {
             unify(constraint, indexType, indexer->indexType);

@@ -870,4 +870,51 @@ TEST_CASE_FIXTURE(BuiltinsFixture, "singleton_when_type_is_blocked")
 
 
 
+TEST_CASE_FIXTURE(Fixture, "index_with_string_singleton_uses_property_type")
+{
+    DOES_NOT_PASS_OLD_SOLVER_GUARD();
+
+    CheckResult result = check(R"(
+        --!strict
+        type Thing = {
+            a: number,
+            b: string,
+            ["a" | "b"]: number | string,
+        }
+
+        local test: Thing = { a = 1, b = "Hello World!" }
+
+        local key: "a" = "a"
+        local value: number = test[key]
+    )");
+
+    LUAU_REQUIRE_NO_ERRORS(result);
+}
+
+TEST_CASE_FIXTURE(Fixture, "index_with_string_singleton_narrowed_by_comparison")
+{
+    DOES_NOT_PASS_OLD_SOLVER_GUARD();
+
+    CheckResult result = check(R"(
+        --!strict
+        type Thing = {
+            a: number,
+            b: string,
+            ["a" | "b"]: number | string,
+        }
+
+        local test: Thing = { a = 1, b = "Hello World!" }
+
+        local function read(k: "a" | "b")
+            if k == "a" then
+                local v: number = test[k]
+                return v
+            end
+            return 0
+        end
+    )");
+
+    LUAU_REQUIRE_NO_ERRORS(result);
+}
+
 TEST_SUITE_END();
