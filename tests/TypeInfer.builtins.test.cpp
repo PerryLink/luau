@@ -782,10 +782,6 @@ TEST_CASE_FIXTURE(BuiltinsFixture, "bad_select_should_not_crash")
 
 TEST_CASE_FIXTURE(BuiltinsFixture, "select_way_out_of_range")
 {
-    // CLI-115720
-    if (!FFlag::DebugLuauForceOldSolver)
-        return;
-
     CheckResult result = check(R"(
         select(5432598430953240958)
     )");
@@ -797,10 +793,6 @@ TEST_CASE_FIXTURE(BuiltinsFixture, "select_way_out_of_range")
 
 TEST_CASE_FIXTURE(BuiltinsFixture, "select_slightly_out_of_range")
 {
-    // CLI-115720
-    if (!FFlag::DebugLuauForceOldSolver)
-        return;
-
     CheckResult result = check(R"(
         select(3, "a", 1)
     )");

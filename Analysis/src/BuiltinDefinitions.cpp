@@ -1360,13 +1360,23 @@ bool MagicSelect::infer(const MagicFunctionCallContext& context)
                 std::vector<TypeId> res(v.begin() + offset, v.end());
                 TypePackId resTypePack = context.solver->arena->addTypePack({std::move(res), tail});
                 asMutable(context.result)->ty.emplace<BoundTypePack>(resTypePack);
+                return true;
             }
             else if (tail)
+            {
                 asMutable(context.result)->ty.emplace<BoundTypePack>(*tail);
-
-            return true;
+                return true;
+            }
         }
 
+        if (FFlag::LuauCyclicRequireTypeInference)
+            context.solver->reportError(
+                GenericError{"bad argument #1 to select (index out of range)"}, arg1->location, *context.constraint->moduleName
+            );
+        else
+            context.solver->DEPRECATED_reportError(
+                TypeError{arg1->location, GenericError{"bad argument #1 to select (index out of range)"}}
+            );
         return false;
     }
 
